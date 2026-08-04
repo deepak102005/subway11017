@@ -19,7 +19,7 @@ export default function RewardPage() {
       {/* Confetti Explosion on Unlocked State */}
       {!isClaimed && <Confetti trigger={true} />}
 
-      <Header showBack={!isClaimed} />
+      <Header />
 
       <div className="flex-1 w-full flex flex-col items-center justify-center px-4 py-4 text-center">
         {/* Top Logo */}
