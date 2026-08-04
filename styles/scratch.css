@@ -1,0 +1,53 @@
+/* Custom Scratch Card & Subway Theme Styling */
+
+.scratch-card-container {
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.16);
+  touch-action: none;
+}
+
+.silver-metallic-bg {
+  background: linear-gradient(135deg, #e0e0e0 0%, #ffffff 40%, #aaaaaa 70%, #d6d6d6 100%);
+  background-size: 200% 200%;
+  animation: shineMetallic 6s ease infinite;
+}
+
+@keyframes shineMetallic {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Torn / Rough edge border effect matching Image 3 design */
+.torn-paper-border {
+  position: relative;
+  background-color: #ffffff;
+  border-radius: 20px;
+}
+
+.torn-paper-border::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: -6px;
+  right: -6px;
+  bottom: -6px;
+  border: 4px dashed #007A33;
+  border-radius: 24px;
+  pointer-events: none;
+  opacity: 0.2;
+}
+
+.subway-text-stroke {
+  -webkit-text-stroke: 1px #007A33;
+}
+
+/* Pulse animation for touch hint icon */
+@keyframes touchPulse {
+  0% { transform: scale(1); opacity: 0.9; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(1); opacity: 0.9; }
+}
+
+.animate-touch-pulse {
+  animation: touchPulse 2s infinite ease-in-out;
+}
