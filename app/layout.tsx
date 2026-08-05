@@ -11,6 +11,11 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Subway - Review & Win Free Cookie',
   description: 'Leave a Google Review and claim your free Subway cookie reward!',
+  icons: {
+    icon: '/subway-logo.png',
+    shortcut: '/subway-logo.png',
+    apple: '/subway-logo.png',
+  },
 };
 
 export default function RootLayout({
