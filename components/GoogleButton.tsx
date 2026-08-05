@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaChevronRight } from 'react-icons/fa';
 import { buttonVariants } from '@/lib/animations';
@@ -17,16 +17,19 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
   text = 'Google Review & Claim',
   className = '',
 }) => {
+  const [isProcessing, setIsProcessing] = useState(false);
+
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
+    if (isProcessing) return;
+    setIsProcessing(true);
+
     if (onClick) {
       onClick();
     }
-    // Open Google Review in a new tab so returning to the app tab directly opens Scratch Card
-    const win = window.open(GOOGLE_REVIEW_URL, '_blank');
-    if (!win || win.closed || typeof win.closed === 'undefined') {
-      window.location.href = GOOGLE_REVIEW_URL;
-    }
+
+    // Direct navigation in SAME tab to prevent 'Untitled' blank tabs and preserve session
+    window.location.href = GOOGLE_REVIEW_URL;
   };
 
   return (
@@ -36,8 +39,9 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
       animate="visible"
       whileHover="hover"
       whileTap="tap"
+      disabled={isProcessing}
       onClick={handleClick}
-      className={`w-full max-w-sm sm:max-w-md bg-[#007A33] hover:bg-[#006329] text-white font-bold text-lg sm:text-xl py-4 sm:py-4.5 px-5 rounded-[24px] shadow-[0_12px_30px_rgba(0,0,0,0.18)] border-2 border-white/20 flex items-center justify-between transition-all duration-300 group cursor-pointer active:scale-98 ${className}`}
+      className={`w-full max-w-sm sm:max-w-md bg-[#007A33] hover:bg-[#006329] text-white font-bold text-lg sm:text-xl py-4 sm:py-4.5 px-5 rounded-[24px] shadow-[0_12px_30px_rgba(0,0,0,0.18)] border-2 border-white/20 flex items-center justify-between transition-all duration-300 group cursor-pointer active:scale-98 disabled:opacity-85 disabled:cursor-not-allowed ${className}`}
     >
       {/* Google 'G' Logo Badge */}
       <div className="w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-white flex items-center justify-center p-2 shadow-inner shrink-0">
@@ -63,7 +67,7 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
 
       {/* Button Text */}
       <span className="flex-1 text-center font-bold tracking-tight px-2 drop-shadow-sm">
-        {text}
+        {isProcessing ? 'Opening Google Review...' : text}
       </span>
 
       {/* Right Arrow Icon */}

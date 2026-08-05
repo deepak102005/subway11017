@@ -16,17 +16,52 @@ export default function LandingScreen() {
   const router = useRouter();
   const { state, isLoaded, markReviewCompleted } = useLocalStorage();
 
+  const checkAndNavigate = React.useCallback(() => {
+    const currentState = getRewardState();
+
+    if (currentState.rewardClaimed) {
+      router.push(ROUTES.REWARD);
+      return;
+    }
+
+    if (currentState.reviewCompleted) {
+      router.push(ROUTES.SCRATCH);
+    }
+  }, [router]);
+
   useEffect(() => {
     if (!isLoaded) return;
+    checkAndNavigate();
+  }, [isLoaded, checkAndNavigate]);
 
-    if (state.rewardClaimed) {
-      router.push(ROUTES.REWARD);
-    }
-  }, [state, isLoaded, router]);
+  useEffect(() => {
+    const handleReturn = () => {
+      checkAndNavigate();
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        handleReturn();
+      }
+    };
+
+    const handlePageShow = () => {
+      handleReturn();
+    };
+
+    window.addEventListener('focus', handleReturn);
+    window.addEventListener('pageshow', handlePageShow);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener('focus', handleReturn);
+      window.removeEventListener('pageshow', handlePageShow);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [checkAndNavigate]);
 
   const handleReviewClick = () => {
     markReviewCompleted();
-    router.push(ROUTES.SCRATCH);
   };
 
   return (
