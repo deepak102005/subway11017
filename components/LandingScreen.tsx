@@ -75,6 +75,13 @@ export default function LandingScreen() {
         {/* Primary CTA Google Review Button */}
         <GoogleButton onClick={handleReviewClick} className="my-2" />
 
+        {/* Highlighted Instruction Banner */}
+        <div className="mt-3 mb-2 px-4 py-2 rounded-xl bg-[#007A33]/10 border-2 border-[#007A33]/30 shadow-sm max-w-sm sm:max-w-md w-full flex items-center justify-center">
+          <p className="text-xs sm:text-sm font-black text-[#007A33] uppercase tracking-wide">
+            Leave a Review & <span className="bg-[#FFC72C] text-[#007A33] px-2 py-0.5 rounded-md font-black">Come Back to Claim</span>
+          </p>
+        </div>
+
         {/* Limited Time Notice */}
         <LimitedOffer />
       </div>
