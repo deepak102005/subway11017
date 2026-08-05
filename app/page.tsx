@@ -6,7 +6,7 @@ import LandingScreen from '@/components/LandingScreen';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ROUTES } from '@/lib/routes';
 
-import { getRewardState } from '@/utils/storage';
+import { getRewardState, isReviewPendingInSession } from '@/utils/storage';
 
 export default function Home() {
   const router = useRouter();
@@ -20,7 +20,7 @@ export default function Home() {
       return;
     }
 
-    if (currentState.reviewCompleted) {
+    if (currentState.reviewCompleted && isReviewPendingInSession()) {
       router.push(ROUTES.SCRATCH);
     }
   }, [router]);

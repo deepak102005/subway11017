@@ -10,7 +10,7 @@ import FooterWave from '@/components/FooterWave';
 import AnimatedContainer from '@/components/AnimatedContainer';
 import { useLocalStorage } from '@/hooks/useLocalStorage';
 import { ROUTES } from '@/lib/routes';
-import { getRewardState } from '@/utils/storage';
+import { getRewardState, isReviewPendingInSession } from '@/utils/storage';
 
 export default function LandingScreen() {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function LandingScreen() {
       return;
     }
 
-    if (currentState.reviewCompleted) {
+    if (currentState.reviewCompleted && isReviewPendingInSession()) {
       router.push(ROUTES.SCRATCH);
     }
   }, [router]);
