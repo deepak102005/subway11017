@@ -1,12 +1,16 @@
 import { STORAGE_KEYS } from '@/lib/constants';
 import { UserRewardState } from '@/types/reward';
 
+const SESSION_KEY_REVIEW_PENDING = 'subway_review_pending_ts';
+
 const defaultState: UserRewardState = {
   reviewCompleted: false,
   scratchCompleted: false,
   rewardUnlocked: false,
   rewardClaimed: false,
 };
+
+// ─── Core State Helpers ────────────────────────────────────────────────────────
 
 export const getRewardState = (): UserRewardState => {
   if (typeof window === 'undefined') return defaultState;
@@ -35,28 +39,59 @@ export const updateRewardState = (
   }
 };
 
-export const markReviewCompleted = (): UserRewardState => {
-  if (typeof window !== 'undefined') {
-    try {
-      sessionStorage.setItem('subway_review_pending', 'true');
-    } catch (e) {
-      console.error('Error setting sessionStorage:', e);
-    }
+// ─── Review Pending (set when user taps Google Maps button) ────────────────────
+
+/**
+ * Called the moment the user taps "Google Review & Claim".
+ * Records the timestamp so we know when to verify from.
+ */
+export const setReviewPending = (): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.setItem(SESSION_KEY_REVIEW_PENDING, String(Date.now()));
+  } catch (e) {
+    console.error('Error setting review pending:', e);
   }
+};
+
+/**
+ * Returns the timestamp (ms) when the user opened Maps, or null if not pending.
+ */
+export const getReviewPendingTimestamp = (): number | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = sessionStorage.getItem(SESSION_KEY_REVIEW_PENDING);
+    if (!raw) return null;
+    const ts = parseInt(raw, 10);
+    return isNaN(ts) ? null : ts;
+  } catch {
+    return null;
+  }
+};
+
+/**
+ * Clears the review-pending flag (called after verification completes).
+ */
+export const clearReviewPending = (): void => {
+  if (typeof window === 'undefined') return;
+  try {
+    sessionStorage.removeItem(SESSION_KEY_REVIEW_PENDING);
+  } catch {
+    // ignore
+  }
+};
+
+// ─── Review Completed (only called after successful API verification) ──────────
+
+export const markReviewCompleted = (): UserRewardState => {
+  clearReviewPending();
   return updateRewardState({
     reviewCompleted: true,
     reviewTimestamp: Date.now(),
   });
 };
 
-export const isReviewPendingInSession = (): boolean => {
-  if (typeof window === 'undefined') return false;
-  try {
-    return sessionStorage.getItem('subway_review_pending') === 'true';
-  } catch (e) {
-    return false;
-  }
-};
+// ─── Scratch / Reward ──────────────────────────────────────────────────────────
 
 export const markScratchCompleted = (): UserRewardState => {
   return updateRewardState({
@@ -78,7 +113,7 @@ export const resetRewardState = (): UserRewardState => {
   if (typeof window === 'undefined') return defaultState;
   try {
     localStorage.removeItem(STORAGE_KEYS.STATE);
-    sessionStorage.removeItem('subway_review_pending');
+    clearReviewPending();
   } catch (e) {
     console.error('Error resetting state:', e);
   }

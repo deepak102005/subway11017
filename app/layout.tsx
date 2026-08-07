@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
+import { ToastProvider } from '@/components/ToastContext';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -26,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="bg-[#F8F8F8] text-[#171717] antialiased min-h-screen selection:bg-[#007A33] selection:text-white">
-        {children}
+        <ToastProvider>{children}</ToastProvider>
       </body>
     </html>
   );

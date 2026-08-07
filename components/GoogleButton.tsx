@@ -4,12 +4,66 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaChevronRight } from 'react-icons/fa';
 import { buttonVariants } from '@/lib/animations';
-import { GOOGLE_REVIEW_URL } from '@/lib/constants';
+import { GOOGLE_MAPS_DEEP_LINK, GOOGLE_MAPS_WEB_URL } from '@/lib/constants';
+import { setReviewPending } from '@/utils/storage';
 
 interface GoogleButtonProps {
   onClick?: () => void;
   text?: string;
   className?: string;
+}
+
+/**
+ * Opens Google Maps using the native app deep link when available,
+ * with a web URL fallback. Always stays in the same tab to prevent
+ * blank/untitled pages.
+ *
+ * Priority:
+ *   1. comgooglemaps:// — iOS Google Maps app
+ *   2. intent:// — Android Google Maps app
+ *   3. https://maps.google.com — Web fallback
+ */
+function openGoogleMaps() {
+  const ua = navigator.userAgent.toLowerCase();
+  const isAndroid = /android/.test(ua);
+  const isIOS = /iphone|ipad|ipod/.test(ua);
+
+  if (isIOS) {
+    // Try to open the native iOS Google Maps app.
+    // We create a hidden iframe to attempt the custom scheme without navigating away.
+    // If the app opens, great. After the timeout the page stays open.
+    // We then fall back to the web URL via window.location.
+    let appOpened = false;
+
+    // Listen for blur — if the page loses focus the app likely opened
+    const blurHandler = () => { appOpened = true; };
+    window.addEventListener('blur', blurHandler, { once: true });
+
+    // Attempt deep link
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = GOOGLE_MAPS_DEEP_LINK;
+    document.body.appendChild(iframe);
+
+    setTimeout(() => {
+      document.body.removeChild(iframe);
+      window.removeEventListener('blur', blurHandler);
+      if (!appOpened) {
+        // App not installed — fall back to web in same tab
+        window.location.href = GOOGLE_MAPS_WEB_URL;
+      }
+    }, 1200);
+  } else if (isAndroid) {
+    // On Android use the intent:// URI which keeps the browser alive
+    const intentUrl =
+      `intent://maps.google.com/maps?q=Subway+11017+S+Parker+Rd+Parker+CO#Intent;` +
+      `scheme=https;package=com.google.android.apps.maps;` +
+      `S.browser_fallback_url=${encodeURIComponent(GOOGLE_MAPS_WEB_URL)};end`;
+    window.location.href = intentUrl;
+  } else {
+    // Desktop — just open the web URL in the same tab
+    window.location.href = GOOGLE_MAPS_WEB_URL;
+  }
 }
 
 export const GoogleButton: React.FC<GoogleButtonProps> = ({
@@ -24,12 +78,14 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
     if (isProcessing) return;
     setIsProcessing(true);
 
+    // Record the exact moment the user tapped — used by the verification API
+    setReviewPending();
+
     if (onClick) {
       onClick();
     }
 
-    // Direct navigation in SAME tab to prevent 'Untitled' blank tabs and preserve session
-    window.location.href = GOOGLE_REVIEW_URL;
+    openGoogleMaps();
   };
 
   return (
@@ -67,7 +123,7 @@ export const GoogleButton: React.FC<GoogleButtonProps> = ({
 
       {/* Button Text */}
       <span className="flex-1 text-center font-bold tracking-tight px-2 drop-shadow-sm">
-        {isProcessing ? 'Opening Google Review...' : text}
+        {isProcessing ? 'Opening Google Maps...' : text}
       </span>
 
       {/* Right Arrow Icon */}

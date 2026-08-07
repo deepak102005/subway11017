@@ -9,6 +9,7 @@ export interface StoreLocation {
 export interface UserRewardState {
   reviewCompleted: boolean;
   reviewTimestamp?: number;
+  reviewPendingTimestamp?: number; // set when user taps Maps button
   scratchCompleted: boolean;
   scratchTimestamp?: number;
   rewardUnlocked: boolean;
